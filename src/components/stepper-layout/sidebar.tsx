@@ -5,7 +5,7 @@ export const Sidebar = () => {
   const { currentStep, setStep } = useStepper();
 
   return (
-    <nav className="flex flex-col h-full w-3/12 p-10 gap-y-8 rounded-3xl bg-[url('/assets/bg-sidebar-desktop.svg')] bg-no-repeat bg-cover">
+    <nav className="flex flex-col h-full w-1/3 p-10 gap-y-8 rounded-3xl bg-[url('/assets/bg-sidebar-desktop.svg')] bg-no-repeat bg-cover">
       {steps.map((title, index) => (
         <Step
           key={title}

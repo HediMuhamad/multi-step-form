@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { FC, useState } from "react";
+import { Switch } from "../ui/switch";
 import { Headline } from "./components/headline";
 
 export const SelectPlan = () => {
@@ -26,8 +27,15 @@ export const SelectPlan = () => {
             />
           ))}
         </div>
-        <div className="flex flex-row justify-center items-center w-full h-16 bg-slate-50 rounded-lg">
-          Monthly Yearly
+        <div className="flex flex-row justify-center items-center gap-x-2 w-full h-16 bg-slate-50 rounded-lg">
+          Monthly
+          <Switch
+            onClick={() => {
+              console.log("object");
+              setSelectedPeriod(selectedPeriod === "year" ? "month" : "year");
+            }}
+          />
+          Yearly
         </div>
       </div>
     </div>
