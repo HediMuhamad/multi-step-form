@@ -16,7 +16,9 @@ export const Button: FC<ButtonProps> = (props) => {
   return (
     <button
       {...props}
-      className={`${props?.className} py-4 px-8 capitalize rounded-lg ${
+      className={`${
+        props?.className
+      } hover:opacity-90 py-4 px-8 capitalize rounded-lg ${
         styles[props.variant]
       }`}
     />

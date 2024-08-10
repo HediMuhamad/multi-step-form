@@ -1,13 +1,17 @@
+import { PERIOD, PLAN } from "@/constants/field-name";
+import { plans } from "@/constants/plans";
+import { PeriodType } from "@/types/period-type";
+import { PlanType } from "@/types/plan-type";
+import { periodShortener } from "@/utils/period-shortner";
 import Image from "next/image";
-import { FC, useState } from "react";
+import { FC } from "react";
+import { Controller, useFormContext } from "react-hook-form";
 import { Switch } from "../ui/switch";
 import { Headline } from "./components/headline";
 
 export const SelectPlan = () => {
-  const [selectedPlan, setSelectedPlan] = useState<PlanType>();
-  const [selectedPeriod, setSelectedPeriod] = useState<"month" | "year">(
-    "year"
-  );
+  const { watch } = useFormContext();
+  console.log(watch());
 
   return (
     <div className={`flex flex-col gap-y-14`}>
@@ -16,23 +20,14 @@ export const SelectPlan = () => {
         description="You have the option of monthly or yearly billing."
       />
       <div className="flex flex-col gap-y-8">
-        <div className="flex flex-row justify-between gap-x-6">
-          {Object.values(PlanType).map((type) => (
-            <PlanCard
-              key={type}
-              type={type}
-              period={selectedPeriod}
-              isSelected={type == selectedPlan}
-              onClick={() => setSelectedPlan(type)}
-            />
-          ))}
-        </div>
+        <ControlledPlanCard types={Object.values(PlanType)} />
         <div className="flex flex-row justify-center items-center gap-x-2 w-full h-16 bg-slate-50 rounded-lg">
           Monthly
-          <Switch
-            onClick={() => {
-              console.log("object");
-              setSelectedPeriod(selectedPeriod === "year" ? "month" : "year");
+          <ControlledSwitch
+            name={PERIOD}
+            values={{
+              false: PeriodType.MONTHLY,
+              true: PeriodType.YEARLY,
             }}
           />
           Yearly
@@ -42,15 +37,9 @@ export const SelectPlan = () => {
   );
 };
 
-enum PlanType {
-  ARCADE = "arcade",
-  ADVANCED = "advanced",
-  PRO = "pro",
-}
-
 interface PlanCardProps {
   type: PlanType;
-  period: "month" | "year";
+  period: PeriodType;
   isSelected?: boolean;
   onClick?: () => void;
 }
@@ -61,19 +50,19 @@ const PlanCard: FC<PlanCardProps> = ({
   isSelected,
   onClick: handleClick,
 }) => {
-  const periodText = period === "month" ? "mo" : "yr";
-  const price =
-    plansProps[type]?.[period === "year" ? "yearlyPlan" : "monthlyPlan"];
+  const periodText = periodShortener(period);
+  const price = plans?.[type]?.[period];
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       className={`flex flex-col flex-1 gap-y-24 p-6 justify-between  border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-blue-300 cursor-pointer transition-all ${
         isSelected ? "bg-blue-50 border-blue-200" : ""
       }`}
     >
       <Image
-        src={plansProps[type]?.icon}
+        src={plans[type]?.icon}
         alt={type + "-icon"}
         width={64}
         height={64}
@@ -83,9 +72,9 @@ const PlanCard: FC<PlanCardProps> = ({
         <p className="font-light text-slate-900/50 mt-1 text-start">
           ${price + " / " + periodText}
         </p>
-        {period === "year" && (
+        {period === PeriodType.YEARLY && (
           <p className="font-light text-slate-900/700 text-start">
-            {plansProps[type]?.yearlyFreeMonths} months free
+            {plans[type]?.yearlyFreeMonths} months free
           </p>
         )}
       </div>
@@ -93,23 +82,65 @@ const PlanCard: FC<PlanCardProps> = ({
   );
 };
 
-const plansProps = {
-  arcade: {
-    icon: "/assets/icon-arcade.svg",
-    monthlyPlan: 9,
-    yearlyPlan: 90,
-    yearlyFreeMonths: 2,
-  },
-  advanced: {
-    icon: "/assets/icon-advanced.svg",
-    monthlyPlan: 12,
-    yearlyPlan: 120,
-    yearlyFreeMonths: 2,
-  },
-  pro: {
-    icon: "/assets/icon-pro.svg",
-    monthlyPlan: 15,
-    yearlyPlan: 150,
-    yearlyFreeMonths: 2,
-  },
+const ControlledPlanCard: FC<{ types: Array<PlanType> }> = ({ types }) => {
+  const period = useFormContext()?.watch(PERIOD);
+
+  return (
+    <Controller
+      name={PLAN}
+      render={({ field, fieldState }) => (
+        <div className="flex flex-col gap-y-4">
+          <div className="flex flex-row flex-wrap justify-between gap-6">
+            {types?.map((type) => (
+              <PlanCard
+                key={type}
+                period={period}
+                type={type}
+                isSelected={field?.value === type}
+                onClick={() => {
+                  field.onChange(type);
+                  field.onBlur();
+                }}
+              />
+            ))}
+          </div>
+          <div
+            className={`${
+              fieldState.error ? "block" : "hidden"
+            } flex items-center px-4 py-3 bg-red-50 text-red-500 rounded-lg capitalize`}
+          >
+            {fieldState.error?.message}
+          </div>
+        </div>
+      )}
+    />
+  );
+};
+
+const ControlledSwitch = ({
+  name,
+  values,
+}: {
+  name: string;
+  values?: { true?: string; false?: string };
+}) => {
+  const { true: trueValue, false: falseValue } = {
+    true: true,
+    false: false,
+    ...values,
+  };
+
+  return (
+    <Controller
+      name={name}
+      render={({ field }) => (
+        <Switch
+          value={field.value}
+          onClick={() =>
+            field.onChange(field.value === trueValue ? falseValue : trueValue)
+          }
+        />
+      )}
+    />
+  );
 };

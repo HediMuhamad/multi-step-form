@@ -2,7 +2,7 @@ import { steps } from "@/constants/steps";
 import { useStepper } from "@/store/stepper";
 
 export const Sidebar = () => {
-  const { currentStep, setStep } = useStepper();
+  const { currentStep, setStep, isSubmitted } = useStepper();
 
   return (
     <nav className="flex flex-col h-full w-1/3 p-10 gap-y-8 rounded-3xl bg-[url('/assets/bg-sidebar-desktop.svg')] bg-no-repeat bg-cover">
@@ -13,6 +13,7 @@ export const Sidebar = () => {
           step={index}
           active={currentStep === index}
           onClick={setStep}
+          isDisabled={isSubmitted}
         />
       ))}
     </nav>
@@ -24,15 +25,21 @@ const Step = ({
   step,
   active,
   onClick,
+  isDisabled,
 }: {
   title: string;
   step: number;
   active: boolean;
   onClick?: (index: number) => void;
+  isDisabled?: boolean;
 }) => {
   return (
     <button
-      className={`flex gap-x-5 w-full text-slate-100 uppercase p-2 rounded-lg hover:bg-slate-950/5 transition-all`}
+      disabled={isDisabled}
+      type="button"
+      className={`flex gap-x-5 w-full text-slate-100 uppercase p-2 rounded-lg transition-all ${
+        !isDisabled ? "hover:bg-slate-950/5" : ""
+      }`}
       onClick={() => onClick?.(step)}
     >
       <div

@@ -1,21 +1,25 @@
-import { steps } from "@/constants/steps";
 import { useStepper } from "@/store/stepper";
 import { Button } from "../buttons";
 
-const maxSteps = steps.length - 1;
 export const Action = () => {
-  const { currentStep } = useStepper();
+  const { currentStep, prevStep, isLastStep, isSubmitted } = useStepper();
+
+  if (isSubmitted) return <></>;
 
   return (
-    <div className="flex  w-full justify-end items-center">
-      {currentStep !== 0 && <Button variant="text">back</Button>}
+    <div className="flex w-full justify-end items-center">
+      {currentStep !== 0 && (
+        <Button variant="text" onClick={prevStep}>
+          back
+        </Button>
+      )}
       <Button
         variant="contained"
-        className="ml-auto"
+        className={`ml-auto  ${isLastStep() ? "!bg-blue-800" : ""}`}
         type="submit"
         form="mainForm"
       >
-        next step
+        {isLastStep() ? "Submit" : "Next Step"}
       </Button>
     </div>
   );
